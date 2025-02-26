@@ -111,4 +111,4 @@ HEALTHCHECK --interval=30s --timeout=5s CMD curl --fail http://localhost:11211/g
 ENTRYPOINT ["zanod"]
 
 # Start zanod with sane defaults
-CMD --disable-upnp --log-level=0 --no-console --rpc-bind-ip=0.0.0.0
+CMD ["--disable-upnp", "--log-level=0", "--no-console", "--rpc-bind-ip=0.0.0.0"]
