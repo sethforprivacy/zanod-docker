@@ -18,7 +18,8 @@ RUN apt update && \
     gcc \
     g++ \
     git \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /root
 
@@ -34,7 +35,7 @@ ARG OPENSSL_HASH=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac
 # Number of threads to use when building
 # Set to 4 by default, simply remove the =4 to enable automatic thread detection
 # Note that automatically detecting threads can often lead to a failure to build due to lack of memory
-ARG NPROC=1
+ARG NPROC
 
 # Environment Variables
 ENV BOOST_ROOT=/root/boost_${BOOST_VERSION}
@@ -81,15 +82,20 @@ RUN set -x &&\
 # Run Zano in final image
 FROM ubuntu:24.04 AS final
 
+# Upgrade base image
+RUN apt update \
+    && apt upgrade -y
+
 # Install dependencies
 RUN apt update && apt install --no-install-recommends -y \
     curl \
-    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create non-root zano user and group
-RUN useradd -ms /bin/bash zano &&\
-    mkdir -p /home/zano/.Zano &&\
-    chown -R zano:zano /home/zano/.Zano
+RUN useradd -ms /bin/bash zano \
+    && mkdir -p /home/zano/.Zano \
+    && chown -R zano:zano /home/zano/.Zano
 
 USER zano:zano
 
