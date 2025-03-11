@@ -12,12 +12,14 @@ RUN apt update && \
     build-essential \
     ca-certificates \
     cmake \
-    libicu-dev \
-    libz-dev \
     curl \
-    gcc \
     g++ \
+    gcc \
     git \
+    libicu-dev \
+    libssl-dev \
+    libz-dev \
+    pkg-config \
     && apt clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -27,10 +29,6 @@ WORKDIR /root
 ARG BOOST_VERSION=1_84_0
 ARG BOOST_VERSION_DOT=1.84.0
 ARG BOOST_HASH=cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454
-
-# OpenSSL library settings
-ARG OPENSSL_VERSION_DOT=1.1.1w
-ARG OPENSSL_HASH=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
 
 # Number of threads to use when building
 # Set to 4 by default, simply remove the =4 to enable automatic thread detection
@@ -48,30 +46,13 @@ RUN set -ex \
     && echo "${BOOST_HASH}  boost_${BOOST_VERSION}.tar.bz2" | sha256sum -c\
     && tar -xvf boost_${BOOST_VERSION}.tar.bz2
 
-
-# Download OpenSSL
-RUN curl https://www.openssl.org/source/openssl-${OPENSSL_VERSION_DOT}.tar.gz -OL \
-    &&  sha256sum openssl-${OPENSSL_VERSION_DOT}.tar.gz \
-    && echo "${OPENSSL_HASH} openssl-${OPENSSL_VERSION_DOT}.tar.gz" | sha256sum -c
-
 # Compile Boost
 RUN set -ex \
     && cd boost_${BOOST_VERSION} \
     && ./bootstrap.sh --with-libraries=system,filesystem,thread,date_time,chrono,regex,serialization,atomic,program_options,locale,timer,log \
-    && ./b2
+    && ./b2 -j ${NPROC:-$(nproc)}
 
-# Compile OpenSSL
-RUN set -ex \
-    && tar xaf openssl-${OPENSSL_VERSION_DOT}.tar.gz \
-    && rm openssl-${OPENSSL_VERSION_DOT}.tar.gz \
-    && cd openssl-${OPENSSL_VERSION_DOT} \
-    && ./config --prefix=/root/openssl --openssldir=/root/openssl shared zlib no-tests \
-    && make -j ${NPROC:-$(nproc)} \
-    && make install \
-    && cd .. \
-    && rm -rf openssl-${OPENSSL_VERSION_DOT}
-
-# Determine threads available and build zanod daemon from latest master
+# Build zanod daemon from chosen branch/release
 RUN set -x &&\
     git clone --single-branch --recursive --branch ${ZANO_BRANCH} https://github.com/hyle-team/zano.git &&\
     cd zano &&\
