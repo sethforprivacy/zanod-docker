@@ -3,8 +3,9 @@ FROM ubuntu:24.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set Zano branch to build against
-ARG ZANO_BRANCH=2.1.0.382
+# Set Zano branch and commit to build against
+ARG ZANO_BRANCH=master
+ARG ZANO_COMMIT=ccfc0327e05f73478b8493accec4a7a1878ff4b1
 
 # Download and install dependencies
 RUN apt update && \
@@ -56,6 +57,7 @@ RUN set -ex \
 RUN set -x &&\
     git clone --single-branch --recursive --branch ${ZANO_BRANCH} https://github.com/hyle-team/zano.git &&\
     cd zano &&\
+    git reset --hard ${ZANO_COMMIT_HASH} &&\
     mkdir build && cd build &&\
     cmake -D STATIC=TRUE .. &&\
     make -j ${NPROC:-$(nproc)} daemon
