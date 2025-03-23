@@ -57,7 +57,7 @@ RUN set -ex \
 RUN set -x &&\
     git clone --single-branch --recursive --branch ${ZANO_BRANCH} https://github.com/hyle-team/zano.git &&\
     cd zano &&\
-    git reset --hard ${ZANO_COMMIT_HASH} &&\
+    test `git rev-parse HEAD` = ${ZANO_COMMIT} || exit 1 &&\
     mkdir build && cd build &&\
     cmake -D STATIC=TRUE .. &&\
     make -j ${NPROC:-$(nproc)} daemon
