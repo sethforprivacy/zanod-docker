@@ -4,8 +4,8 @@ FROM ubuntu:24.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Set Zano branch and commit to build against
-ARG ZANO_BRANCH=2.1.7.418
-ARG ZANO_COMMIT=f8e298af8638b63a18e39d86f1a585cacba3644e
+ARG ZANO_BRANCH=2.1.7.424
+ARG ZANO_COMMIT=6e6831c355ebbf009f4aef93460f0d6b73d91261
 
 # Download and install dependencies
 RUN apt update && \
